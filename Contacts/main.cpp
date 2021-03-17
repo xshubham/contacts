@@ -28,11 +28,11 @@ public:
 	friend ostream& operator<<(ostream&, const tel_directory&);
 	friend istream& operator>>(istream&, tel_directory&);
 	// operations
-	int add(const fstream&);
+	friend int add(tel_directory&);
 	int del(const fstream&);
 	int edit(const fstream&);
 	int search(const fstream&);
-	void view(const fstream&);
+	friend void view(const tel_directory&);
 };
 
 // about application
@@ -72,10 +72,56 @@ istream& operator>>(istream& in, tel_directory& obj) {
 	return in;
 }
 
+// operations
+int add(tel_directory& obj) {
+	fstream fs;
+	// --------------- cin>>obj>>fs>>contacts.txt ------------------------
+	fs.open("contacts.txt", ios::app | ios::out);
+	if (fs.fail()) {
+		cerr << "Add-contacts.txt: Unable to open" << endl;
+	}
+	else {
+		// writing
+		while (true) {
+			cin >> obj;
+			fs.write((char*)&obj, sizeof(obj));
+			cin.get(); // eating \n character
+			char ch;
+			cout << "Continue(y/n): "; cin.get(ch);
+			if (ch == 'n' || ch == 'N')
+				break;
+			fflush(stdin); // flushing standard input buffer
+		}
+		fs.close();
+	}
+	return 0;
+}
+
+void view(const tel_directory& obj) {
+	fstream fs;
+	fs.open("./contacts.txt", ios::in);
+	if (fs.fail()) {
+		cerr << "View-contacts.txt: Unable to open" << endl;
+		return;
+	}
+	// calculating number of objects in file
+	fs.seekg(0, ios::end);
+	int numOfObjectsInFile = fs.tellg();
+	numOfObjectsInFile /= sizeof(obj);
+	// resetting get ptr to the beginning of file for read operation
+	fs.seekg(0, ios::beg);
+	// reading
+	while (numOfObjectsInFile > 0) {
+		fs.read((char*)&obj, sizeof(obj));
+		cout << obj << endl;
+		numOfObjectsInFile--;
+	}
+	fs.close();
+}
+
 // driver
 int main () {
 
-	fstream fs;
 	tel_directory obj;
 	int choice = 0;
 
@@ -87,7 +133,7 @@ int main () {
 			switch (choice)
 			{
 			case 1:
-				// add();
+				add(obj);
 				break;
 			case 2:
 				// del();
@@ -99,7 +145,7 @@ int main () {
 				// search();
 				break;
 			case 5:
-				// view();
+				view(obj);
 				break;
 			case 6:
 				about();
