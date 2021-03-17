@@ -31,7 +31,7 @@ public:
 	friend int add(tel_directory&);
 	int del(const fstream&);
 	int edit(const fstream&);
-	int search(const fstream&);
+	friend int search(const char*, const tel_directory&);
 	friend void view(const tel_directory&);
 };
 
@@ -97,6 +97,40 @@ int add(tel_directory& obj) {
 	return 0;
 }
 
+int search(const char* key, const tel_directory& obj) {
+	fstream fs;
+	bool searchFlag = true;
+
+	fs.open("./contacts.txt", ios::in);
+	if (fs.fail()) {
+		cerr << "View-contacts.txt: Unable to open" << endl;
+	}
+	else {
+		// calculating number of objects in file
+		fs.seekg(0, ios::end);
+		int numOfObjectsInFile = fs.tellg();
+		numOfObjectsInFile /= sizeof(obj);
+		// resetting get ptr to the beginning of file for read operation
+		fs.seekg(0, ios::beg);
+		// searching
+		bool flag;
+		cout << endl;
+		while (numOfObjectsInFile > 0) {
+			fs.read((char*)&obj, sizeof(obj));
+			flag = true;
+			flag = strcmp(key, obj.name);
+			if (flag == false) {
+				cout << obj << endl;
+				searchFlag = false;
+			}
+			numOfObjectsInFile--;
+		}
+		if (searchFlag == true)
+			cout << "\"" << key << "\" not found\n";
+		fs.close();
+	}
+	return 0;
+}
 
 void view(const tel_directory& obj) {
 	fstream fs;
@@ -134,6 +168,7 @@ int main () {
 	while (true) {
 		cout << "1. Add\n2. Delete\n3. Edit\n4. Search\n5. View All\n6. About\n7. Exit" << endl;
 		cout << "Choice: "; cin >> choice;
+		system("cls");
 		if (choice < 8 && choice > 0) {
 			switch (choice)
 			{
@@ -148,15 +183,24 @@ int main () {
 				// edit();
 				break;
 			case 4:
-				// search();
+				char key[Size];
+				cout << "\nEnter key: "; cin >> key;
+				search(key, obj);
+				cout << endl;
 				break;
 			case 5:
 				view(obj);
-				cout << endl;
+				cout << "\nPress any key..." << endl;
+				cin.get();
+				cin.get();
+				system("cls");
 				break;
 			case 6:
 				about();
-				cout << endl;
+				cout << "\nPress any key..." << endl;
+				cin.get();
+				cin.get();
+				system("cls");
 				break;
 			case 7:
 				cout << "\nGood Bye!!!" << endl;
