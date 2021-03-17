@@ -133,12 +133,13 @@ int main () {
 	// menu
 	while (true) {
 		cout << "1. Add\n2. Delete\n3. Edit\n4. Search\n5. View All\n6. About\n7. Exit" << endl;
-		cin >> choice;
+		cout << "Choice: "; cin >> choice;
 		if (choice < 8 && choice > 0) {
 			switch (choice)
 			{
 			case 1:
 				add(obj);
+				cout << endl;
 				break;
 			case 2:
 				// del();
@@ -155,6 +156,7 @@ int main () {
 				break;
 			case 6:
 				about();
+				cout << endl;
 				break;
 			case 7:
 				cout << "\nGood Bye!!!" << endl;
