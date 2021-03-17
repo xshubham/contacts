@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <iomanip>
+#include <sstream> // to convert string of digits(number) to integer(number)
 using namespace std;
 
 // global enumeration constant
@@ -47,8 +48,19 @@ ostream& operator<<(ostream& out, const tel_directory& obj) {
 }
 
 istream& operator>>(istream& in, tel_directory& obj) {
-	cout << "Input name: "; in >> obj.name;
-	cout << "Input number: "; in >> obj.number;
+	unsigned int x = 0;
+	while (true) {
+		cout << "Input name: "; in >> obj.name;
+		cout << "Input number: "; in >> obj.number;
+		stringstream convert(obj.number); // converting string to integer
+		convert >> x;
+		if (x != 0) {
+			break;
+		}
+		else {
+			cerr << "Invalid number entered.\nTry again...\n" << endl;
+		}
+	}
 	return in;
 }
 // driver
