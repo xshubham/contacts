@@ -1,7 +1,7 @@
 # contacts
-Contacts Console Application v0.1
-Developer: Shubham Kumar
-Project Initiation Date: 16th March, 2021
+Contacts Console Application v0.1<br />
+Developer: Shubham Kumar<br />
+Project Initiation Date: 16th March, 2021<br />
 E-mail: shubhamxst@gmail.com
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 A simple contactbook program developed using C++.
