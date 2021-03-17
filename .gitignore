@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Program's contacts.txt file, it'll be update each time
+# when program will be executed so it's necessary to
+# ignore it and not include it in commits. - SHUBHAM KUMAR
+Contacts/contacts.txt
+
 # User-specific files
 *.rsuser
 *.suo
