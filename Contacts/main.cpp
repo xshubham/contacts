@@ -97,6 +97,7 @@ int add(tel_directory& obj) {
 	return 0;
 }
 
+
 void view(const tel_directory& obj) {
 	fstream fs;
 	fs.open("./contacts.txt", ios::in);
@@ -111,6 +112,10 @@ void view(const tel_directory& obj) {
 	// resetting get ptr to the beginning of file for read operation
 	fs.seekg(0, ios::beg);
 	// reading
+	cout << "\nContact Console Application v0.1\n"
+		<< "Total " << numOfObjectsInFile << " contacts\n\n  "
+		<< setiosflags(ios::left) << setw(15) << "CONTACT_NAME" << resetiosflags(ios::left)
+		<< setiosflags(ios::right) << setw(30) << "NUMBER" << resetiosflags(ios::right) << endl;
 	while (numOfObjectsInFile > 0) {
 		fs.read((char*)&obj, sizeof(obj));
 		cout << obj << endl;
@@ -146,6 +151,7 @@ int main () {
 				break;
 			case 5:
 				view(obj);
+				cout << endl;
 				break;
 			case 6:
 				about();
