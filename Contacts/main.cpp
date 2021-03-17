@@ -27,7 +27,16 @@ public:
 	// overloaded operators
 	friend ostream& operator<<(ostream&, const tel_directory&);
 	friend istream& operator>>(istream&, tel_directory&);
+	// operations
+	int add(const fstream&);
+	int del(const fstream&);
+	int edit(const fstream&);
+	int search(const fstream&);
+	void view(const fstream&);
 };
+
+// about application
+void about(void);
 
 // constructor
 tel_directory::tel_directory(const char* Name, const char* num) : tel_directory() {
@@ -93,7 +102,7 @@ int main () {
 				// view();
 				break;
 			case 6:
-				// about();
+				about();
 				break;
 			case 7:
 				cout << "\nGood Bye!!!" << endl;
@@ -104,4 +113,13 @@ int main () {
 		}
 	}
 	return 0;
+}
+
+// about application
+void about(void) {
+	cout << "\nContacts Console Application v0.1\nDeveloped By Shubham Kumar\n"
+		<< "For any suggestion, e-mail me on \"shubhamxst@gmail.com\"\n"
+		<< "If you want to contribute to this project, you can fork the repository"
+		<< " from https://github.com/xshubham/contacts.git" << endl;
+	return;
 }
