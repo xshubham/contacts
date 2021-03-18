@@ -6,8 +6,9 @@
 #include <sstream> // to convert string of digits(number) to integer(number)
 using namespace std;
 
-// global enumeration constant
+// global constants
 enum {numSize=11, Size=21};
+char file[] = "contacts.bin";
 
 // blueprint for telephone directory
 class tel_directory {
@@ -29,7 +30,7 @@ public:
 	friend istream& operator>>(istream&, tel_directory&);
 	// operations
 	friend int add(tel_directory&);
-	int del(const fstream&);
+	friend int del(const char*, const tel_directory&);
 	int edit(const fstream&);
 	friend int search(const char*, const tel_directory&);
 	friend void view(const tel_directory&);
@@ -75,10 +76,10 @@ istream& operator>>(istream& in, tel_directory& obj) {
 // operations
 int add(tel_directory& obj) {
 	fstream fs;
-	// --------------- cin>>obj>>fs>>contacts.txt ------------------------
-	fs.open("contacts.txt", ios::app | ios::out);
+	// --------------- cin>>obj>>fs>>contacts.bin ------------------------
+	fs.open(file, ios::app | ios::out);
 	if (fs.fail()) {
-		cerr << "Add-contacts.txt: Unable to open" << endl;
+		cerr << "Add-" << file << ": Unable to open" << endl;
 	}
 	else {
 		// writing
@@ -101,14 +102,14 @@ int search(const char* key, const tel_directory& obj) {
 	fstream fs;
 	bool searchFlag = true;
 
-	fs.open("./contacts.txt", ios::in);
+	fs.open(file, ios::in);
 	if (fs.fail()) {
-		cerr << "View-contacts.txt: Unable to open" << endl;
+		cerr << "View-" << file << ": Unable to open" << endl;
 	}
 	else {
 		// calculating number of objects in file
 		fs.seekg(0, ios::end);
-		int numOfObjectsInFile = fs.tellg();
+		streamoff numOfObjectsInFile = fs.tellg();
 		numOfObjectsInFile /= sizeof(obj);
 		// resetting get ptr to the beginning of file for read operation
 		fs.seekg(0, ios::beg);
@@ -132,21 +133,131 @@ int search(const char* key, const tel_directory& obj) {
 	return 0;
 }
 
+int del(const char* key, const tel_directory& obj) {
+	// searching for key
+	streamoff loc = 0, numOfObjectsInFile = 0;
+	fstream fs, cs;
+
+	fs.open(file, ios::in | ios::out);
+	if (fs.fail()) {
+		cerr << "Del-" << file << ": Unable to open" << endl;
+	}
+	else {
+		// calculating number of objects in file
+		fs.seekg(0, ios::end);
+		numOfObjectsInFile = fs.tellg();
+		numOfObjectsInFile /= sizeof(obj);
+		// resetting get ptr to the beginning of file for read operation
+		fs.seekg(0, ios::beg);
+		// searching
+		bool flag = true;
+		streamoff temp = numOfObjectsInFile;
+		while (temp > 0) {
+			fs.read((char*)&obj, sizeof(obj));
+			flag = strcmp(key, obj.name);
+			if (flag == false) {
+				loc = fs.tellg();
+				break;
+			}
+			temp--;
+		}
+	}
+	fs.clear();
+	// deletion
+	if (loc != 0) {
+		streamoff temp = loc;
+		loc -= sizeof(obj);
+		cs.open("./cnt.tmp", ios ::out);
+		if (cs.fail()) {
+			cerr << "del()CSout: Can't open the file" << endl;
+		}
+		else {
+			streamoff temp1 = numOfObjectsInFile;
+			// seeking to object next to object which is gonna be deleted
+			temp1 -= (temp / sizeof(obj));
+			fs.seekg(temp, ios::beg);
+			// reading contacts after contact which is gonna be deleted
+			// and writing them to a temporary file
+			while (temp1 > 0) {
+				fs.read((char*)&obj, sizeof(obj));
+				cs.write((char*)&obj, sizeof(obj));
+				temp1--;
+			}
+			fs.clear();
+			cs.close();
+			fs.seekp(loc, ios::beg);
+			cs.open("./cnt.tmp", ios::in);
+			if (cs.fail()) {
+				cerr << "del()CSin: Can't open the file" << endl;
+			}
+			else {
+				// write to contacts.bin from cnt.tmp
+				temp1 = numOfObjectsInFile;
+				temp1 -= (temp / sizeof(obj));
+				while (temp1 > 0) {
+					cs.read((char*)&obj, sizeof(obj));
+					fs.write((char*)&obj, sizeof(obj));
+					temp1--;
+				}
+			}
+			cout << "\n\'" << key << "\' deleted." << endl;
+			cs.close();
+			fs.close();
+		}
+		// removing the last item that will be left making multiple
+		// copies of it
+		fs.open(file, ios::in | ios::out);
+		if (fs.fail()) {
+			cerr << "DelRem-" << file << ": Unable to open" << endl;
+		}
+		else {
+			cs.open("cnt.tmp", ios::out | ios::in);
+			if (cs.fail()) {
+				cerr << "del()CSout2: Can't open the file" << endl;
+			}
+			else {
+				temp = numOfObjectsInFile - 1;
+				// copying each object leaving the last one
+				while (temp > 0) {
+					fs.read((char*)&obj, sizeof(obj));
+					cs.write((char*)&obj, sizeof(obj));
+					temp--;
+				}
+				cs.clear();
+				fs.clear();
+				fs.seekp(0, ios::beg);
+				cs.seekg(0, ios::beg);
+				temp = numOfObjectsInFile - 1;
+				while (temp-- > 0) {
+					cs.read((char*)&obj, sizeof(obj));
+					fs.write((char*)&obj, sizeof(obj));
+				}
+				fs.close();
+				cs.close();
+				remove("cnt.tmp");
+			}
+		}
+	}
+	else
+		cout << "\'" << key << "\' not found" << endl;
+	return 0;
+}
+
 void view(const tel_directory& obj) {
 	fstream fs;
-	fs.open("./contacts.txt", ios::in);
+	fs.open(file, ios::in);
 	if (fs.fail()) {
-		cerr << "View-contacts.txt: Unable to open" << endl;
+		cerr << "View-" << file << ": Unable to open" << endl;
 		return;
 	}
 	// calculating number of objects in file
 	fs.seekg(0, ios::end);
-	int numOfObjectsInFile = fs.tellg();
+	streamoff numOfObjectsInFile = fs.tellg();
 	numOfObjectsInFile /= sizeof(obj);
 	// resetting get ptr to the beginning of file for read operation
 	fs.seekg(0, ios::beg);
 	// reading
-	cout << "\nContact Console Application v0.1\n"
+	cout << "\nContacts Console Application v0.1\n"
 		<< "Total " << numOfObjectsInFile << " contacts\n\n  "
 		<< setiosflags(ios::left) << setw(15) << "CONTACT_NAME" << resetiosflags(ios::left)
 		<< setiosflags(ios::right) << setw(30) << "NUMBER" << resetiosflags(ios::right) << endl;
@@ -163,10 +274,12 @@ int main () {
 
 	tel_directory obj;
 	int choice = 0;
+	char key[Size];
 
 	// menu
 	while (true) {
-		cout << "1. Add\n2. Delete\n3. Edit\n4. Search\n5. View All\n6. About\n7. Exit" << endl;
+		cout << " Contacts Console Application v0.1\n -------------- MENU -------------\n\n";
+		cout << " 1. Add\n 2. Delete\n 3. Edit\n 4. Search\n 5. View All\n 6. About\n 7. Exit\n" << endl;
 		cout << "Choice: "; cin >> choice;
 		system("cls");
 		if (choice < 8 && choice > 0) {
@@ -177,13 +290,14 @@ int main () {
 				cout << endl;
 				break;
 			case 2:
-				// del();
+				cout << "\nEnter key: "; cin >> key;
+				del(key, obj);
+				cout << endl;
 				break;
 			case 3:
 				// edit();
 				break;
 			case 4:
-				char key[Size];
 				cout << "\nEnter key: "; cin >> key;
 				search(key, obj);
 				cout << endl;

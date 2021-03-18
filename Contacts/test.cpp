@@ -1,17 +1,14 @@
-/*
-#include <iostream>
-#include <cstring>
+/*#include <iostream>
+#include <fstream>
 using namespace std;
 
-int main()
-{
-	char* name = new char[20];
-	cin >> name;
-	cout << name;
-	int len = strlen(name);
-	char* another_name = new char[len+1];
-	strcpy_s(another_name, len+1, name);
-	cout << another_name;
+int main() {
+	fstream fs;
+	fs.open("contacts.bin", ios::ate | ios::out);
+	if (fs.fail())
+		cout << "failed" << endl;
+    else
+        cout << "not failed" << endl;
+    fs.close();
 	return 0;
-}
-*/
+}*/
