@@ -31,7 +31,7 @@ public:
 	// operations
 	friend int add(tel_directory&);
 	friend int del(const char*, const tel_directory&);
-	int edit(const fstream&);
+	friend void edit(tel_directory&);
 	friend int search(const char*, const tel_directory&);
 	friend void view(const tel_directory&);
 };
@@ -226,6 +226,10 @@ int del(const char* key, const tel_directory& obj) {
 				cs.clear();
 				fs.close();
 				fs.open(file, ios::out | ios::trunc);
+				if (fs.fail()) {
+					cerr << "Unable to write to " << file << endl;
+					exit(1);
+				}
 				cs.seekg(0, ios::beg);
 				temp = numOfObjectsInFile - 1;
 				while (temp-- > 0) {
@@ -269,6 +273,49 @@ void view(const tel_directory& obj) {
 	fs.close();
 }
 
+void edit(tel_directory& obj) {
+	char key[Size];
+	cout << "Which contact(Input name)? ";
+	cin >> key;
+	// searching for key
+	streamoff loc = 0, numOfObjectsInFile = 0;
+	fstream fs, cs;
+
+	fs.open(file, ios::in | ios::out);
+	if (fs.fail()) {
+		cerr << "Edit-" << file << ": Unable to open" << endl;
+	}
+	else {
+		// calculating number of objects in file
+		fs.seekg(0, ios::end);
+		numOfObjectsInFile = fs.tellg();
+		numOfObjectsInFile /= sizeof(obj);
+		// resetting get ptr to the beginning of file for read operation
+		fs.seekg(0, ios::beg);
+		// searching
+		bool flag = true;
+		streamoff temp = numOfObjectsInFile;
+		while (temp-- > 0) {
+			fs.read((char*)&obj, sizeof(obj));
+			flag = strcmp(key, obj.name);
+			if (flag == false) {
+				loc = fs.tellg();
+				break;
+			}
+		}
+		if (flag)
+			cerr << key << " not found in the contact book." << endl;
+		else {
+			fs.clear();
+			loc -= sizeof(obj);
+			fs.seekp(loc, ios::beg);
+			cin >> obj;
+			fs.write((char*)&obj, sizeof(obj));
+		}
+	}
+	fs.close();
+}
+
 // driver
 int main () {
 
@@ -295,7 +342,7 @@ int main () {
 				cout << endl;
 				break;
 			case 3:
-				// edit();
+				edit(obj);
 				break;
 			case 4:
 				cout << "\nEnter key: "; cin >> key;
