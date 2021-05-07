@@ -42,8 +42,8 @@ void about(void);
 // constructor
 tel_directory::tel_directory(const char* Name, const char* num) : tel_directory() {
 	if (Name != NULL && num != NULL) {
-		int lenName = strlen(Name);
-		int lenNum = strlen(num);
+		size_t lenName = strlen(Name);
+		size_t lenNum = strlen(num);
 		(lenName < Size) ? strcpy_s(name, lenName+1, Name) : 0;
 		(lenNum == 10) ? strcpy_s(number, lenNum+1, num) : 0;
 	}
@@ -167,7 +167,7 @@ int del(const char* key, const tel_directory& obj) {
 	if (loc != 0) {
 		streamoff temp = loc;
 		loc -= sizeof(obj);
-		cs.open("./cnt.tmp", ios ::out);
+		cs.open("./cnt.tmp", ios::out);
 		if (cs.fail()) {
 			cerr << "del()CSout: Can't open the file" << endl;
 		}
@@ -206,7 +206,7 @@ int del(const char* key, const tel_directory& obj) {
 		}
 		// removing the last item that will be left making multiple
 		// copies of it
-		fs.open(file, ios::in | ios::out);
+		fs.open(file, ios::in);
 		if (fs.fail()) {
 			cerr << "DelRem-" << file << ": Unable to open" << endl;
 		}
@@ -224,8 +224,8 @@ int del(const char* key, const tel_directory& obj) {
 					temp--;
 				}
 				cs.clear();
-				fs.clear();
-				fs.seekp(0, ios::beg);
+				fs.close();
+				fs.open(file, ios::out | ios::trunc);
 				cs.seekg(0, ios::beg);
 				temp = numOfObjectsInFile - 1;
 				while (temp-- > 0) {
